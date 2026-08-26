@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="明势 TrendSpect：AI 重构金融未来，聚合全球金融事件、AI 产业动态与量化数据模型的实时趋势洞察引擎。">
+  <title>明势 TrendSpect | AI 金融趋势洞察引擎</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230F172A'/%3E%3Cpath d='M16 6l8 4.6v9.2L16 24.4 8 19.8v-9.2L16 6z' fill='none' stroke='%23165DFF' stroke-width='1.8'/%3E%3Ccircle cx='16' cy='16' r='2.4' fill='%2336BFFA'/%3E%3Cpath d='M16 6v20M8 10.4l16 11.2M24 10.4L8 21.6' stroke='%2336BFFA' stroke-width='0.8' opacity='0.6'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- 顶部固定导航 -->
+  <header class="nav" id="topnav">
+    <div class="nav-inner">
+      <a class="brand" href="#hero" aria-label="明势 TrendSpect 首页">
+        <svg class="brand-logo" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+          <defs>
+            <linearGradient id="brandLogoGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#165dff"/>
+              <stop offset="1" stop-color="#36bffa"/>
+            </linearGradient>
+          </defs>
+          <rect width="32" height="32" rx="8" fill="#0d1a38" stroke="url(#brandLogoGrad)" stroke-width="1.4"/>
+          <path d="M16 5.8l8.6 5v10.4L16 26.2l-8.6-5V10.8l8.6-5z" fill="none" stroke="url(#brandLogoGrad)" stroke-width="1.6"/>
+          <circle cx="16" cy="16" r="2.6" fill="#36bffa"/>
+          <path d="M16 8.6v14.8M9.6 12.3l12.8 7.4M22.4 12.3L9.6 19.7" stroke="#36bffa" stroke-width="0.7" opacity="0.6"/>
+          <circle cx="25.6" cy="6.8" r="1.3" fill="#8ec5ff"/>
+          <circle cx="6.4" cy="25.2" r="1.3" fill="#8ec5ff"/>
+        </svg>
+        <span class="brand-text">明势</span>
+      </a>
+
+      <nav class="nav-links" aria-label="主导航">
+        <a href="#overview" class="nav-link mono">实时快讯</a>
+        <a href="#trends" class="nav-link mono">趋势大盘</a>
+        <a href="#graph" class="nav-link mono">事件图谱</a>
+        <a href="#insights" class="nav-link mono">深度专栏</a>
+        <a href="#forecast" class="nav-link mono">预测模型</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a class="btn btn-primary btn-sm" href="#tools">去订阅</a>
+        <button class="nav-burger" id="navBurger" type="button" aria-label="打开菜单" aria-expanded="false" aria-controls="mobileMenu">
+          <span class="burger-bar"></span>
+          <span class="burger-bar"></span>
+          <span class="burger-bar"></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 移动端环形菜单 -->
+  <div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="站点菜单" aria-hidden="true" inert>
+    <div class="mobile-menu-inner">
+      <a href="#overview" class="mono" style="--i:0">实时快讯</a>
+      <a href="#trends" class="mono" style="--i:1">趋势大盘</a>
+      <a href="#graph" class="mono" style="--i:2">事件图谱</a>
+      <a href="#insights" class="mono" style="--i:3">深度专栏</a>
+      <a href="#forecast" class="mono" style="--i:4">预测模型</a>
+      <a href="#tools" class="mobile-menu-cta mono" style="--i:5">去订阅</a>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- ============ 首屏 Hero ============ -->
+    <section class="hero" id="hero">
+      <div class="hero__tunnel" id="heroTunnel" aria-hidden="true"></div>
+      <div class="hero__scrim" aria-hidden="true"></div>
+
+      <div class="hero__body prlx" data-prlx="0.16">
+        <div class="hero__panel">
+          <h1 class="hero__tagline">
+            <span class="particle-text hero__particle-title" id="heroParticleText" aria-label="AI Trends">
+              <canvas class="particle-text__canvas" aria-hidden="true"></canvas>
+              <span class="particle-text__sr">AI Trends</span>
+            </span>
+            <span class="hero__title-sub">聚合&amp;分析全球AI大事件</span>
+          </h1>
+
+      <!-- AI 金融热点手风琴画廊：5 张实拍图，从左至右对应下方模块 1-5，点击定位到对应模块 -->
+      <div class="hero-gallery" id="heroGallery" role="list" aria-label="AI 金融热点手风琴画廊">
+        <a class="ag-panel" role="listitem" tabindex="0" href="#overview" aria-label="实时快讯">
+          <span class="ag-panel__frame">
+            <span class="ag-panel__media"><img src="assets/carousel/01-news.jpg" alt="实时快讯" draggable="false"></span>
+            <span class="ag-panel__overlay" aria-hidden="true"></span>
+          </span>
+          <span class="ag-panel__label" aria-hidden="true">
+            <span class="ag-panel__text">实时快讯</span>
+          </span>
+        </a>
+        <a class="ag-panel" role="listitem" tabindex="0" href="#trends" aria-label="趋势大盘">
+          <span class="ag-panel__frame">
+            <span class="ag-panel__media"><img src="assets/carousel/02-trends.jpg" alt="趋势大盘" draggable="false"></span>
+            <span class="ag-panel__overlay" aria-hidden="true"></span>
+          </span>
+          <span class="ag-panel__label" aria-hidden="true">
+            <span class="ag-panel__text">趋势大盘</span>
+          </span>
+        </a>
+        <a class="ag-panel" role="listitem" tabindex="0" href="#graph" aria-label="重大事件因果图谱">
+          <span class="ag-panel__frame">
+            <span class="ag-panel__media"><img src="assets/carousel/03-graph.jpg" alt="重大事件因果图谱" draggable="false"></span>
+            <span class="ag-panel__overlay" aria-hidden="true"></span>
+          </span>
+          <span class="ag-panel__label" aria-hidden="true">
+            <span class="ag-panel__text">重大事件因果图谱</span>
+          </span>
+        </a>
+        <a class="ag-panel" role="listitem" tabindex="0" href="#insights" aria-label="深度专栏">
+          <span class="ag-panel__frame">
+            <span class="ag-panel__media"><img src="assets/carousel/04-insight.jpg" alt="深度专栏" draggable="false"></span>
+            <span class="ag-panel__overlay" aria-hidden="true"></span>
+          </span>
+          <span class="ag-panel__label" aria-hidden="true">
+            <span class="ag-panel__text">深度专栏</span>
+          </span>
+        </a>
+        <a class="ag-panel" role="listitem" tabindex="0" href="#forecast" aria-label="预测模型">
+          <span class="ag-panel__frame">
+            <span class="ag-panel__media"><img src="assets/carousel/05-forecast.jpg" alt="预测模型" draggable="false"></span>
+            <span class="ag-panel__overlay" aria-hidden="true"></span>
+          </span>
+          <span class="ag-panel__label" aria-hidden="true">
+            <span class="ag-panel__text">预测模型</span>
+          </span>
+        </a>
+      </div>
+
+          <div class="hero-cta">
+            <a class="btn btn-primary hero-scroll-btn" href="#overview" id="heroScrollBtn" aria-label="下滑查看内容">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 头图到内容区的柔和渐变过渡 -->
+      <div class="hero__fade" aria-hidden="true"></div>
+    </section>
+
+    <!-- ============ 模块1 实时快讯 ============ -->
+    <section class="section" id="overview" data-prlx="0">
+      <div class="section-head prlx" data-prlx="0.12">
+        <h2 class="section-title warp-text-target">实时快讯</h2>
+        <p class="section-desc">AI 过滤噪音，只留定价信号。</p>
+      </div>
+
+      <div class="news-toolbar">
+        <div class="tab-group" role="tablist" aria-label="快讯分类">
+          <button class="tab is-active" data-cat="all" role="tab" aria-selected="true">全部</button>
+          <button class="tab" data-cat="ai" role="tab" aria-selected="false">AI产业动态</button>
+          <button class="tab" data-cat="policy" role="tab" aria-selected="false">资本市场政策</button>
+          <button class="tab" data-cat="market" role="tab" aria-selected="false">二级市场异动</button>
+          <button class="tab" data-cat="global" role="tab" aria-selected="false">海外金融事件</button>
+          <button class="tab" data-cat="reg" role="tab" aria-selected="false">监管新规</button>
+        </div>
+        <div class="seg-group" role="group" aria-label="时间范围">
+          <button class="seg is-active" data-range="24h">24小时</button>
+          <button class="seg" data-range="7d">7天</button>
+          <button class="seg" data-range="30d">30天</button>
+        </div>
+      </div>
+
+      <div class="news-layout">
+        <div class="news-feed" id="newsFeed">
+          <!-- 由 JS 渲染 -->
+        </div>
+
+        <aside class="news-side">
+          <div class="panel">
+            <h3 class="panel-title">AI 事件权重 TOP5</h3>
+            <ol class="weight-list" id="weightList">
+              <!-- 由 JS 渲染 -->
+            </ol>
+          </div>
+          <div class="panel">
+            <h3 class="panel-title">关联推荐</h3>
+            <p class="panel-hint">点击任意快讯，这里会展开上下游标的与历史同类事件。</p>
+            <div class="related-box" id="relatedBox">
+              <div class="related-empty">尚未选择事件</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ 模块2 趋势大盘 ============ -->
+    <section class="section section-alt" id="trends">
+      <div class="section-head prlx" data-prlx="0.12">
+        <h2 class="section-title warp-text-target">趋势大盘</h2>
+        <p class="section-desc">交互图表，支持缩放、下钻与导出。</p>
+      </div>
+
+      <div class="chart-grid">
+        <article class="chart-card chart-wide">
+          <div class="chart-head">
+            <div>
+              <h3 class="chart-title">AI 金融赛道资金流向</h3>
+              <span class="chart-meta mono" id="fundMeta">口径：主力净流入（亿元）</span>
+            </div>
+            <div class="chart-actions">
+              <div class="seg-group" role="group" aria-label="资金流向维度">
+                <button class="seg is-active" data-dim="day">日</button>
+                <button class="seg" data-dim="week">周</button>
+                <button class="seg" data-dim="month">月</button>
+              </div>
+              <button class="icon-btn export-btn" data-export="fundChart" type="button" aria-label="导出资金流向图" title="导出PNG">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="chart-body" id="fundChart"></div>
+        </article>
+
+        <article class="chart-card">
+          <div class="chart-head">
+            <div>
+              <h3 class="chart-title">相关板块涨跌热力图</h3>
+              <span class="chart-meta mono">近 5 个交易日 · 涨跌幅 %</span>
+            </div>
+            <button class="icon-btn export-btn" data-export="heatChart" type="button" aria-label="导出热力图" title="导出PNG">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+            </button>
+          </div>
+          <div class="chart-body" id="heatChart"></div>
+        </article>
+
+        <article class="chart-card">
+          <div class="chart-head">
+            <div>
+              <h3 class="chart-title">全球主要市场 AI 概念表现</h3>
+              <span class="chart-meta mono">本周区间涨跌幅 %</span>
+            </div>
+            <button class="icon-btn export-btn" data-export="marketChart" type="button" aria-label="导出市场对比图" title="导出PNG">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+            </button>
+          </div>
+          <div class="chart-body" id="marketChart"></div>
+        </article>
+
+        <article class="chart-card chart-wide">
+          <div class="chart-head">
+            <div>
+              <h3 class="chart-title">政策事件与行情走势叠加</h3>
+              <span class="chart-meta mono">AI 板块指数 · 政策热度指数</span>
+            </div>
+            <button class="icon-btn export-btn" data-export="policyChart" type="button" aria-label="导出政策叠加图" title="导出PNG">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+            </button>
+          </div>
+          <div class="chart-body" id="policyChart"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ 模块3 重大事件因果图谱 ============ -->
+    <section class="section" id="graph">
+      <div class="section-head prlx" data-prlx="0.12">
+        <h2 class="section-title warp-text-target">重大事件因果图谱</h2>
+        <p class="section-desc">点开节点，看传导链与复盘。</p>
+      </div>
+
+      <div class="graph-layout">
+        <div class="graph-main panel">
+          <div id="eventGraph" class="graph-canvas"></div>
+          <div class="graph-legend" id="graphLegend"></div>
+        </div>
+        <aside class="graph-side" id="graphSide">
+          <!-- 由 JS 渲染 -->
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ 模块4 深度专栏 ============ -->
+    <section class="section" id="insights">
+      <div class="section-head prlx" data-prlx="0.12">
+        <h2 class="section-title warp-text-target">深度专栏</h2>
+        <p class="section-desc">周更研判，双周趋势。</p>
+      </div>
+
+      <div class="insight-grid">
+        <article class="insight-card insight-featured">
+          <div class="insight-body">
+            <span class="insight-type mono">短期研判 · 本周</span>
+            <h3 class="insight-title">本周关键变量：算力价格、政策资金与拥挤度</h3>
+            <p class="insight-excerpt">算力涨价、政策资金、拥挤度，三变量拆解。</p>
+            <ul class="insight-points">
+              <li>成交占比升至 21.4%</li>
+              <li>三次政策催化的资金行为</li>
+              <li>短期波动加大，中期未破</li>
+            </ul>
+            <button class="btn btn-ghost btn-sm" data-article="short">阅读全文</button>
+          </div>
+          <div class="insight-visual">
+            <div id="insightMiniChart" class="insight-chart"></div>
+          </div>
+        </article>
+
+        <article class="insight-card">
+          <div class="insight-body">
+            <span class="insight-type mono">中长期趋势 · 双周</span>
+            <h3 class="insight-title">AI 资本开支周期的位置判断：从算力军备到应用兑现</h3>
+            <p class="insight-excerpt">周期定位：从算力军备到应用兑现。</p>
+            <ul class="insight-points">
+              <li>资本开支见顶，收入待兑现</li>
+              <li>关注推理成本与留存</li>
+              <li>未来 2-3 季度进入分化期</li>
+            </ul>
+            <button class="btn btn-ghost btn-sm" data-article="long">阅读全文</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ 模块5 预测模型 ============ -->
+    <section class="section section-alt" id="forecast">
+      <div class="section-head prlx" data-prlx="0.12">
+        <h2 class="section-title warp-text-target">预测模型</h2>
+        <p class="section-desc">情绪、景气度、风险清单。仅供参考。</p>
+      </div>
+
+      <div class="forecast-grid">
+        <article class="panel forecast-cell">
+          <h3 class="panel-title">短期市场情绪预判</h3>
+          <div class="gauge-wrap" id="sentimentChart"></div>
+          <p class="forecast-note mono">模型置信度 71.2%</p>
+        </article>
+
+        <article class="panel forecast-cell">
+          <h3 class="panel-title">赛道景气度排名</h3>
+          <div class="rank-list" id="rankList">
+            <!-- 由 JS 渲染 -->
+          </div>
+        </article>
+
+        <article class="panel forecast-cell">
+          <h3 class="panel-title">潜在风险预警清单</h3>
+          <ul class="risk-list" id="riskList">
+            <!-- 由 JS 渲染 -->
+          </ul>
+        </article>
+
+        <article class="panel forecast-cell forecast-wide" id="forecastModel">
+          <div class="chart-head">
+            <div>
+              <h3 class="chart-title">历史回测：预测方向 vs 实际走势</h3>
+              <span class="chart-meta mono">近 12 个月 · 命中率 68.4%</span>
+            </div>
+            <button class="icon-btn export-btn" data-export="backtestChart" type="button" aria-label="导出回测图" title="导出PNG">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+            </button>
+          </div>
+          <div class="chart-body chart-body-sm" id="backtestChart"></div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ 模块6 订阅 & 个人工具箱 ============ -->
+    <section class="section section-alt" id="tools">
+      <div class="section-head prlx" data-prlx="0.12">
+        <h2 class="section-title warp-text-target">订阅 & 个人工具箱</h2>
+        <p class="section-desc">简报、预警、关注、下载。</p>
+      </div>
+
+      <div class="tools-layout">
+        <div class="panel tools-subscribe">
+          <h3 class="panel-title">订阅每日简报</h3>
+          <p class="panel-hint">每日 08:00 推送变量与预警。</p>
+          <form class="subscribe-form" id="subscribeForm">
+            <label class="visually-hidden" for="emailInput">邮箱地址</label>
+            <input class="input" id="emailInput" type="email" name="email" placeholder="name@example.com" autocomplete="email" required>
+            <div class="seg-group" role="group" aria-label="推送渠道">
+              <button class="seg is-active" type="button" data-channel="email">邮件</button>
+              <button class="seg" type="button" data-channel="wechat">微信</button>
+            </div>
+            <button class="btn btn-primary btn-block" type="submit">订阅免费简报</button>
+            <p class="form-note">可随时退订。</p>
+          </form>
+        </div>
+
+        <div class="panel tools-focus">
+          <h3 class="panel-title">自定义关注</h3>
+          <p class="panel-hint">选赛道，周更专属简报。</p>
+          <div class="chip-group" id="focusChips">
+            <button class="chip is-selected" type="button">AI算力</button>
+            <button class="chip is-selected" type="button">大模型应用</button>
+            <button class="chip" type="button">自动驾驶</button>
+            <button class="chip" type="button">机器人</button>
+            <button class="chip" type="button">金融科技</button>
+            <button class="chip" type="button">数据要素</button>
+            <button class="chip" type="button">半导体设备</button>
+            <button class="chip" type="button">AI医疗</button>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="buildBriefBtn" type="button">生成我的专属简报</button>
+        </div>
+
+        <div class="tools-stats">
+          <div class="panel tools-stat">
+            <span class="stat-value mono">18.6k</span>
+            <span class="stat-label">每日监控事件</span>
+          </div>
+          <div class="panel tools-stat">
+            <span class="stat-value mono">126</span>
+            <span class="stat-label">覆盖市场指标</span>
+          </div>
+          <div class="panel tools-stat">
+            <span class="stat-value mono">5min</span>
+            <span class="stat-label">信号刷新间隔</span>
+          </div>
+        </div>
+
+        <div class="panel tools-download">
+          <h3 class="panel-title">数据下载</h3>
+          <ul class="download-list">
+            <li>
+              <span class="dl-name mono">ai_fund_flow_daily.csv</span>
+              <span class="dl-meta">公开历史数据</span>
+              <button class="btn btn-ghost btn-xs" type="button" data-download="csv">下载</button>
+            </li>
+            <li>
+              <span class="dl-name mono">monthly_report_2026-07.pdf</span>
+              <span class="dl-meta">月度分析报告</span>
+              <button class="btn btn-ghost btn-xs" type="button" data-download="pdf">下载</button>
+            </li>
+            <li>
+              <span class="dl-name mono">event_graph_data.json</span>
+              <span class="dl-meta">图谱结构化数据</span>
+              <button class="btn btn-ghost btn-xs" type="button" data-download="json">下载</button>
+            </li>
+          </ul>
+          <p class="form-note">均为模拟演示数据。</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="footer" id="footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="#hero" aria-label="明势 TrendSpect">
+          <svg class="brand-logo" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+            <defs>
+              <linearGradient id="brandLogoGradFooter" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0" stop-color="#165dff"/>
+                <stop offset="1" stop-color="#36bffa"/>
+              </linearGradient>
+            </defs>
+            <rect width="32" height="32" rx="8" fill="#0d1a38" stroke="url(#brandLogoGradFooter)" stroke-width="1.4"/>
+            <path d="M16 5.8l8.6 5v10.4L16 26.2l-8.6-5V10.8l8.6-5z" fill="none" stroke="url(#brandLogoGradFooter)" stroke-width="1.6"/>
+            <circle cx="16" cy="16" r="2.6" fill="#36bffa"/>
+            <path d="M16 8.6v14.8M9.6 12.3l12.8 7.4M22.4 12.3L9.6 19.7" stroke="#36bffa" stroke-width="0.7" opacity="0.6"/>
+            <circle cx="25.6" cy="6.8" r="1.3" fill="#8ec5ff"/>
+            <circle cx="6.4" cy="25.2" r="1.3" fill="#8ec5ff"/>
+          </svg>
+          <span class="brand-text">明势<em>TrendSpect</em></span>
+        </a>
+        <p>数据驱动的 AI 金融资讯分析站。</p>
+      </div>
+      <div class="footer-col">
+        <h4>数据来源</h4>
+        <ul>
+          <li>公开财经数据</li>
+          <li>行业研究报告</li>
+          <li>官方公告与监管文件</li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>风险提示</h4>
+        <ul>
+          <li>内容仅为信息分析</li>
+          <li>不构成投资建议</li>
+          <li>市场有风险，投资需谨慎</li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>订阅</h4>
+        <form class="footer-form" id="footerForm">
+          <input class="input input-sm" type="email" placeholder="name@example.com" aria-label="邮箱地址" required>
+          <button class="btn btn-primary btn-sm" type="submit">订阅</button>
+        </form>
+      </div>
+    </div>
+    <div class="footer-bottom mono">
+      <span>© 2026 明势 TrendSpect · 演示站点，数据均为模拟</span>
+      <span>京ICP备00000000号（演示占位）</span>
+    </div>
+  </footer>
+
+  <!-- 全站固定免责声明 -->
+  <div class="disclaimer" id="disclaimer" role="note">
+    <p><strong>风险提示：</strong>本平台所有内容仅为信息分析演示，不构成投资建议。市场有风险，投资需谨慎。</p>
+    <button class="icon-btn" id="disclaimerClose" type="button" aria-label="关闭风险提示">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+
+  <!-- 通用弹层 -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <h3 id="modalTitle">详情</h3>
+        <button class="icon-btn" data-close-modal type="button" aria-label="关闭弹层">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="vendor/echarts.min.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
