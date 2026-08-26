@@ -2125,6 +2125,11 @@ main {
 }
 
 @media (max-width: 720px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
   .hero__particle-title {
     transform: translateY(40px);
   }
@@ -2135,15 +2140,19 @@ main {
 
   .section,
   .section-alt {
-    width: calc(100% - 72px);
-    padding: 60px 20px 40px;
+    width: calc(100% - 40px);
+    padding: 52px 20px 36px;
     margin: 0 auto 32px;
     border-radius: 20px;
   }
 
+  .section-head {
+    margin-bottom: 36px;
+  }
+
   .hero__body {
     justify-content: flex-end;
-    padding: calc(var(--nav-h) + 16px) 20px 148px;
+    padding: calc(var(--nav-h) + 16px) 20px 116px;
   }
 
   .hero-cta {
@@ -2167,9 +2176,10 @@ main {
 
   .hero-gallery {
     width: calc(100% - 24px);
-    margin: 20px auto 0;
-    height: 120px;
+    margin: 18px auto 0;
+    height: 112px;
     --ag-gap: 6px;
+    --ag-grow: 2.2;
   }
 
   .ag-panel__label {
@@ -2189,6 +2199,40 @@ main {
   .news-meta {
     flex-direction: row;
     align-items: center;
+  }
+
+  .chip,
+  .seg,
+  .tab {
+    padding: 11px 15px;
+  }
+
+  .btn-sm {
+    padding: 12px 20px;
+  }
+
+  .btn-xs {
+    padding: 10px 16px;
+  }
+
+  .tools-stats {
+    gap: 12px;
+  }
+
+  .tools-stat {
+    padding: 20px 10px;
+  }
+
+  .tools-stat .stat-value {
+    font-size: clamp(22px, 6vw, 30px);
+  }
+
+  .tools-stat .stat-label {
+    font-size: 12px;
+  }
+
+  .graph-side .panel {
+    min-width: 0;
   }
 
   .chart-grid {
@@ -2246,12 +2290,90 @@ main {
 
   .disclaimer {
     border-radius: 12px;
-    bottom: 10px;
+    bottom: calc(10px + env(safe-area-inset-bottom));
     padding: 10px 12px;
   }
 
   .graph-canvas {
     height: 420px;
+  }
+}
+
+/* 小屏手机（≤420px）进一步收紧 */
+@media (max-width: 420px) {
+  .section,
+  .section-alt {
+    width: calc(100% - 32px);
+    padding: 48px 16px 32px;
+    border-radius: 18px;
+  }
+
+  .hero__body {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .hero__particle-title {
+    transform: translateY(30px);
+  }
+
+  .hero__title-sub {
+    transform: translateY(10px);
+  }
+
+  .hero-gallery {
+    height: 100px;
+    margin-top: 14px;
+    --ag-grow: 2;
+  }
+
+  .ag-panel__text {
+    font-size: 11px;
+  }
+
+  .chart-body {
+    height: 260px;
+  }
+
+  .graph-canvas {
+    height: 360px;
+  }
+
+  .tools-stats {
+    gap: 10px;
+  }
+
+  .tools-stat {
+    padding: 16px 8px;
+  }
+
+  .mobile-menu-inner {
+    gap: 20px;
+  }
+
+  .footer {
+    margin: 0 8px 20px;
+    padding: 36px 18px 18px;
+  }
+}
+
+/* 横屏矮屏（手机横过来）防止首屏内容溢出 */
+@media (max-height: 700px) and (orientation: landscape) {
+  .hero-gallery {
+    height: 88px;
+    margin-top: 12px;
+  }
+
+  .hero__body {
+    padding-bottom: 72px;
+  }
+
+  .hero__particle-title {
+    transform: translateY(20px);
+  }
+
+  .hero__title-sub {
+    transform: translateY(8px);
   }
 }
 
