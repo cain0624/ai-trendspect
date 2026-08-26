@@ -1664,7 +1664,7 @@ void main() {
 
     const started = performance.now();
     const MIN_MS = 600;   // 至少展示 0.6s，避免闪一下
-    const MAX_MS = 3000;  // 兜底：最多 3s，资源再慢也不卡住页面
+    const MAX_MS = 6000;  // 兜底：最多 6s，资源再慢也不卡住页面
     let done = false;
 
     function finish() {
