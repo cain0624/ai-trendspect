@@ -1904,7 +1904,49 @@ void main() {
   }
 
   /* ============ 启动 ============ */
+  /* ============ 预加载：等待关键资源就绪后淡出 Loading ============ */
+  function initPreloader() {
+    const el = document.getElementById("preloader");
+    if (!el) return;
+
+    const started = performance.now();
+    const MIN_MS = 700;   // 至少展示 0.7s，避免闪一下
+    const MAX_MS = 4000;  // 兜底：最多 4s，资源再慢也不卡住页面
+    let done = false;
+
+    function finish() {
+      if (done) return;
+      done = true;
+      el.classList.add("is-done");
+      setTimeout(() => {
+        if (el.parentNode) el.parentNode.removeChild(el);
+      }, 700);
+    }
+
+    const marks = {
+      load: document.readyState === "complete",
+      fonts: !(document.fonts && document.fonts.ready)
+    };
+    let resourcesReady = false;
+
+    function check() {
+      if (resourcesReady || !(marks.load && marks.fonts)) return;
+      resourcesReady = true;
+      const wait = Math.max(0, MIN_MS - (performance.now() - started));
+      setTimeout(finish, wait);
+    }
+
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(() => { marks.fonts = true; check(); });
+    }
+    window.addEventListener("load", () => { marks.load = true; check(); });
+    // 兜底超时：无论资源是否就绪，最多等待 MAX_MS 后关闭
+    setTimeout(() => { marks.load = true; marks.fonts = true; check(); }, MAX_MS);
+    check();
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
+    initPreloader();
     initAccordionGallery();
     initParticleText();
     initLightTunnel();
