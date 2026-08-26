@@ -1481,426 +1481,9 @@ void main() {
     }
   }
 
-  /* ============ WarpText 移植（WebGL 玻璃折射文字） ============ */
-  function initWarpText() {
-    const targets = $$(".warp-text-target");
-    if (!targets.length) return;
+  /* WarpText 已移除（性能优化）：模块标题直接使用普通文字 */
 
-    const VERT = "#version 300 es\nin vec2 position;\nin vec2 uv;\nout vec2 vUv;\nvoid main() { vUv = uv; gl_Position = vec4(position, 0.0, 1.0); }";
-    const FRAG = `#version 300 es
-precision highp float;
-uniform sampler2D uTextTexture;
-uniform vec2 uResolution;
-uniform vec2 uPointer;
-uniform float uPointerActive;
-uniform float uTime;
-uniform float uWarpStrength;
-uniform float uWarpScale;
-uniform float uSpeed;
-uniform float uPointerInfluence;
-uniform float uPointerStrength;
-uniform float uRefraction;
-uniform float uRipple;
-uniform float uMotion;
-in vec2 vUv;
-out vec4 fragColor;
-
-float hash(vec2 p) {
-  p = fract(p * vec2(123.34, 456.21));
-  p += dot(p, p + 45.32);
-  return fract(p.x * p.y);
-}
-
-float noise(vec2 p) {
-  vec2 i = floor(p);
-  vec2 f = fract(p);
-  vec2 u = f * f * (3.0 - 2.0 * f);
-  float a = hash(i);
-  float b = hash(i + vec2(1.0, 0.0));
-  float c = hash(i + vec2(0.0, 1.0));
-  float d = hash(i + vec2(1.0, 1.0));
-  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
-}
-
-float fbm(vec2 p) {
-  float value = 0.0;
-  float amplitude = 0.5;
-  for (int i = 0; i < 4; i++) {
-    value += amplitude * noise(p);
-    p *= 2.02;
-    amplitude *= 0.5;
-  }
-  return value;
-}
-
-vec4 sampleText(vec2 uv) {
-  if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) return vec4(0.0);
-  return texture(uTextTexture, uv);
-}
-
-void main() {
-  vec2 uv = vUv;
-  float aspect = uResolution.x / max(uResolution.y, 1.0);
-  float time = uTime * uSpeed;
-  float scale = max(uWarpScale, 0.001);
-  vec2 drift = vec2(time * 0.055, -time * 0.045);
-  float n1 = fbm(uv * scale * 3.1 + drift);
-  float n2 = fbm((uv + 19.17) * scale * 3.4 - drift.yx);
-  vec2 ambient = (vec2(n1, n2) - 0.5) * uWarpStrength * 0.045 * uMotion;
-  vec2 pointerDelta = uv - uPointer;
-  vec2 aspectDelta = vec2(pointerDelta.x * aspect, pointerDelta.y);
-  float dist = length(aspectDelta);
-  float radius = max(uPointerInfluence, 0.001);
-  float t = clamp(dist / radius, 0.0, 1.0);
-  float lens = smoothstep(radius, 0.0, dist) * uPointerActive;
-  float bulge = t * (1.0 - t) * (1.0 - t) * 6.75 * uPointerActive;
-  vec2 dir = dist > 0.0001 ? vec2(aspectDelta.x / aspect, aspectDelta.y) / dist : vec2(0.0);
-  float rippleWave = sin(dist * 28.0 - time * 4.2) * 0.5 + 0.5;
-  float rippleRing = (rippleWave - 0.5) * uRipple;
-  vec2 pointerWarp = -dir * bulge * uPointerStrength * 0.045;
-  pointerWarp += dir * rippleRing * bulge * uPointerStrength * 0.016;
-  vec2 displaced = uv + ambient + pointerWarp;
-  vec2 splitDir = ambient + pointerWarp;
-  float splitLen = length(splitDir);
-  splitDir = splitLen > 0.00001 ? splitDir / splitLen : vec2(0.7071, 0.7071);
-  vec2 split = splitDir * uRefraction * 0.16 * (0.35 + lens * 1.65);
-  vec4 base = sampleText(displaced);
-  float r = sampleText(displaced + split).r;
-  float g = base.g;
-  float b = sampleText(displaced - split).b;
-  float a = max(max(sampleText(displaced + split).a, base.a), sampleText(displaced - split).a);
-  vec3 color = vec3(r, g, b) + lens * base.a * 0.055;
-  fragColor = vec4(color, a);
-}
-`;
-
-    const instances = [];
-
-    function buildTextCanvas(target, width, height, dpr, fillColor, align) {
-      const c = document.createElement("canvas");
-      c.width = Math.max(1, Math.floor(width * dpr));
-      c.height = Math.max(1, Math.floor(height * dpr));
-      const ctx = c.getContext("2d");
-      if (!ctx) return c;
-      const cs = getComputedStyle(target);
-      let fontSize = parseFloat(cs.fontSize) || 96;
-      const family = cs.fontFamily || "sans-serif";
-      const weight = cs.fontWeight || "700";
-      let ls = cs.letterSpacing === "normal" ? 0 : parseFloat(cs.letterSpacing) || 0;
-      let lh = parseFloat(cs.lineHeight);
-      if (!Number.isFinite(lh)) lh = fontSize * 1.2;
-      const color = fillColor || cs.color || "#ffffff";
-      // 逐行字体：取目标元素的子元素（跳过 <br>）对应的计算样式，支持主/副标题字号拉开
-      const lineEls = Array.from(target.children).filter((el) => el.tagName !== "BR" && el.textContent.trim());
-
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, width, height);
-      ctx.textAlign = "left";
-      ctx.textBaseline = "middle";
-      ctx.fillStyle = color;
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = "high";
-
-      const text = (target.innerText || "").replace(/\n+/g, "\n").trim();
-      const lines = text.split("\n");
-      const applyFont = () => { ctx.font = weight + " " + fontSize + "px " + family; };
-      applyFont();
-      function lineFont(i) {
-        const le = lineEls[i];
-        if (!le) return { size: fontSize, weight: weight, ls: ls };
-        const lcs = getComputedStyle(le);
-        return {
-          size: parseFloat(lcs.fontSize) || fontSize,
-          weight: lcs.fontWeight || weight,
-          ls: lcs.letterSpacing === "normal" ? 0 : parseFloat(lcs.letterSpacing) || 0
-        };
-      }
-      function measureLine(line, fls) {
-        return Array.from(line).reduce((w, ch) => w + ctx.measureText(ch).width, 0) +
-          Math.max(0, Array.from(line).length - 1) * fls;
-      }
-
-      if (!lineEls.length) {
-        // 单字号目标：按容器做整体缩放（原逻辑）
-        const widest = Math.max.apply(null, lines.map((l) => measureLine(l, ls)).concat([1]));
-        const blockH = lh * lines.length;
-        const fit = Math.min(1, (width * 0.86) / widest, (height * 0.8) / blockH);
-        if (fit < 1) {
-          fontSize *= fit;
-          ls *= fit;
-          lh *= fit;
-          applyFont();
-        }
-      }
-
-      // 逐行垂直排布
-      const lineHeights = lines.map((_, i) => lineFont(i).size * 1.32);
-      const totalH = lineHeights.reduce((a, b) => a + b, 0);
-      let y = height / 2 - totalH / 2 + lineHeights[0] / 2;
-      lines.forEach((line, i) => {
-        const lf = lineFont(i);
-        ctx.font = lf.weight + " " + lf.size + "px " + family;
-        const lineW = measureLine(line, lf.ls);
-        let cursor = align === "center"
-          ? width / 2 - lineW / 2
-          : (align === "right" ? width - lineW : 0);
-        Array.from(line).forEach((ch) => {
-          ctx.fillText(ch, cursor, y);
-          cursor += ctx.measureText(ch).width + lf.ls;
-        });
-        y += lineHeights[i];
-      });
-      return c;
-    }
-
-    function create(target) {
-      // 隐藏 DOM 文字前快照原始颜色/文案，栅格化必须用它（防止读到透明色画空纹理）
-      const origStyle = getComputedStyle(target);
-      const orig = {
-        color: origStyle.color || "#ffffff",
-        align: origStyle.textAlign || "left",
-        text: (target.innerText || "").replace(/\n+/g, "\n").trim()
-      };
-
-      const canvas = document.createElement("canvas");
-      canvas.setAttribute("aria-hidden", "true");
-      target.appendChild(canvas);
-      const gl = canvas.getContext("webgl2", { alpha: true, premultipliedAlpha: false, antialias: true });
-      if (!gl) {
-        canvas.remove();
-        return null;
-      }
-
-      function compile(type, src) {
-        const sh = gl.createShader(type);
-        gl.shaderSource(sh, src);
-        gl.compileShader(sh);
-        if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
-          gl.deleteShader(sh);
-          return null;
-        }
-        return sh;
-      }
-      const vs = compile(gl.VERTEX_SHADER, VERT);
-      const fs = compile(gl.FRAGMENT_SHADER, FRAG);
-      if (!vs || !fs) { canvas.remove(); return null; }
-      const prog = gl.createProgram();
-      gl.attachShader(prog, vs);
-      gl.attachShader(prog, fs);
-      gl.linkProgram(prog);
-      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { canvas.remove(); return null; }
-      gl.useProgram(prog);
-
-      const buf = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-        -1, -1, 0, 0,
-        3, -1, 2, 0,
-        -1, 3, 0, 2
-      ]), gl.STATIC_DRAW);
-      const pLoc = gl.getAttribLocation(prog, "position");
-      const uvLoc = gl.getAttribLocation(prog, "uv");
-      gl.enableVertexAttribArray(pLoc);
-      gl.vertexAttribPointer(pLoc, 2, gl.FLOAT, false, 16, 0);
-      gl.enableVertexAttribArray(uvLoc);
-      gl.vertexAttribPointer(uvLoc, 2, gl.FLOAT, false, 16, 8);
-
-      const U = {};
-      ["uTextTexture", "uResolution", "uPointer", "uPointerActive", "uTime", "uWarpStrength", "uWarpScale", "uSpeed", "uPointerInfluence", "uPointerStrength", "uRefraction", "uRipple", "uMotion"].forEach((n) => {
-        U[n] = gl.getUniformLocation(prog, n);
-      });
-
-      const tex = gl.createTexture();
-      gl.bindTexture(gl.TEXTURE_2D, tex);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.clearColor(0, 0, 0, 0);
-      gl.enable(gl.BLEND);
-      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const pointer = { x: 0.5, y: 0.5, tx: 0.5, ty: 0.5, active: 0, activeTarget: 0 };
-      const startTime = performance.now();
-      let raf = 0;
-      let visible = true;
-      let pageVisible = !document.hidden;
-      let disposed = false;
-
-      const uniforms = {
-        uWarpStrength: 0.08,
-        uWarpScale: 1.7,
-        uSpeed: 0.55,
-        uPointerInfluence: 0.42,
-        uPointerStrength: 0.38,
-        uRefraction: 0.018,
-        uRipple: 1
-      };
-      Object.keys(uniforms).forEach((k) => gl.uniform1f(U[k], uniforms[k]));
-      gl.uniform1i(U.uTextTexture, 0);
-      gl.uniform1f(U.uMotion, reduceMotion ? 0 : 1);
-
-      function rasterize() {
-        const rect = target.getBoundingClientRect();
-        if (rect.width <= 0 || rect.height <= 0) return;
-        const tc = buildTextCanvas(target, rect.width, rect.height, dpr, orig.color, orig.align);
-        gl.bindTexture(gl.TEXTURE_2D, tex);
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, tc);
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-      }
-
-      function resize() {
-        const rect = target.getBoundingClientRect();
-        if (rect.width <= 0 || rect.height <= 0) return;
-        canvas.width = Math.round(rect.width * dpr);
-        canvas.height = Math.round(rect.height * dpr);
-        gl.viewport(0, 0, canvas.width, canvas.height);
-        gl.uniform2f(U.uResolution, canvas.width, canvas.height);
-        rasterize();
-      }
-      const ro = new ResizeObserver(resize);
-      ro.observe(target);
-      resize();
-
-      // 自定义字体加载完成后重绘（避免字体加载晚于栅格化导致纹理内容偏差）
-      if (document.fonts && document.fonts.ready) {
-        document.fonts.ready.then(() => {
-          if (!disposed) {
-            rasterize();
-            gl.drawArrays(gl.TRIANGLES, 0, 3);
-          }
-        }).catch(() => {});
-      }
-
-      function onMove(e) {
-        if (e.pointerType === "touch") return;
-        const rect = canvas.getBoundingClientRect();
-        if (rect.width <= 0 || rect.height <= 0) return;
-        pointer.tx = (e.clientX - rect.left) / rect.width;
-        pointer.ty = 1 - (e.clientY - rect.top) / rect.height;
-        pointer.activeTarget = 1;
-      }
-      function onLeave() {
-        pointer.activeTarget = 0;
-      }
-      function onContextLost(e) {
-        if (e.preventDefault) e.preventDefault();
-        tryStop();
-      }
-      if (!reduceMotion) {
-        canvas.addEventListener("pointermove", onMove);
-        canvas.addEventListener("pointerleave", onLeave);
-      }
-      canvas.addEventListener("webglcontextlost", onContextLost, false);
-
-      function loop(now) {
-        if (disposed || reduceMotion) return;
-        const elapsed = (now - startTime) * 0.001;
-        const idleX = 0.5 + Math.sin(elapsed * 0.33) * 0.12;
-        const idleY = 0.5 + Math.cos(elapsed * 0.27) * 0.1;
-        const targetX = pointer.activeTarget > 0 ? pointer.tx : idleX;
-        const targetY = pointer.activeTarget > 0 ? pointer.ty : idleY;
-        const damping = pointer.activeTarget > 0 ? 0.12 : 0.035;
-        pointer.x += (targetX - pointer.x) * damping;
-        pointer.y += (targetY - pointer.y) * damping;
-        pointer.active += ((pointer.activeTarget > 0 ? 1 : 0.18) - pointer.active) * 0.06;
-        gl.uniform2f(U.uPointer, pointer.x, pointer.y);
-        gl.uniform1f(U.uPointerActive, reduceMotion ? pointer.active * 0.35 : pointer.active);
-        gl.uniform1f(U.uTime, reduceMotion ? 0 : elapsed);
-        gl.drawArrays(gl.TRIANGLES, 0, 3);
-        raf = requestAnimationFrame(loop);
-      }
-
-      function tryStart() {
-        if (visible && pageVisible && !raf && !reduceMotion) raf = requestAnimationFrame(loop);
-      }
-      function tryStop() {
-        if (raf !== 0) { cancelAnimationFrame(raf); raf = 0; }
-      }
-      const io = new IntersectionObserver(([entry]) => {
-        visible = entry.isIntersecting;
-        visible ? tryStart() : tryStop();
-      }, { threshold: 0 });
-      io.observe(target);
-      const onVisibility = () => {
-        pageVisible = !document.hidden;
-        pageVisible ? tryStart() : tryStop();
-      };
-      document.addEventListener("visibilitychange", onVisibility);
-
-      const inst = {
-        canvas, gl, ro, io,
-        destroy() {
-          disposed = true;
-          tryStop();
-          ro.disconnect();
-          io.disconnect();
-          document.removeEventListener("visibilitychange", onVisibility);
-          canvas.removeEventListener("pointermove", onMove);
-          canvas.removeEventListener("pointerleave", onLeave);
-          canvas.removeEventListener("webglcontextlost", onContextLost);
-          if (canvas.parentNode === target) target.removeChild(canvas);
-          target.classList.remove("is-warping");
-          const ext = gl.getExtension("WEBGL_lose_context");
-          if (ext) ext.loseContext();
-        },
-        verify() {
-          if (disposed) return;
-          // 先同步绘制一帧，保证 drawing buffer 可读（不依赖 preserveDrawingBuffer）
-          gl.drawArrays(gl.TRIANGLES, 0, 3);
-          const px = new Uint8Array(4);
-          let lit = 0;
-          const w = canvas.width;
-          const h = canvas.height;
-          // 多行网格采样：避免多行文字中线恰好落在行间空隙导致误判
-          const rows = [0.3, 0.4, 0.5, 0.6, 0.7];
-          for (const ry of rows) {
-            for (let i = 1; i < 20; i++) {
-              gl.readPixels(Math.floor((w * i) / 20), Math.floor(h * ry), 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
-              if (px[3] > 10) lit++;
-            }
-          }
-          if (lit === 0) {
-            // 渲染为空：回退到 DOM 文字，保证文案永不消失
-            this.destroy();
-          }
-        }
-      };
-
-      // 成功渲染后隐藏 DOM 文本，由 WebGL 玻璃文字接管
-      if (reduceMotion) {
-        gl.uniform1f(U.uTime, 0);
-        gl.drawArrays(gl.TRIANGLES, 0, 3);
-        target.classList.add("is-warping");
-      } else {
-        tryStart();
-        target.classList.add("is-warping");
-      }
-      // 像素自检：渲染为空则自动回退
-      setTimeout(() => { inst.verify(); }, 900);
-      instances.push(inst);
-      return inst;
-    }
-
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((en) => {
-        const el = en.target;
-        const existing = instances.find((i) => i.el === el);
-        if (en.isIntersecting && !existing) {
-          const inst = create(el);
-          if (inst) inst.el = el;
-        } else if (!en.isIntersecting && existing) {
-          existing.destroy();
-          instances.splice(instances.indexOf(existing), 1);
-        }
-      });
-    }, { threshold: 0 });
-    targets.forEach((t) => io.observe(t));
-  }
-
-  /* ============ 首屏主文案（ParticleText 移植：粒子散聚成字 + 指针排斥 + 呼吸漂移） ============ */
+/* ============ 首屏主文案（ParticleText 移植：粒子散聚成字 + 指针排斥 + 呼吸漂移） ============ */
   function initParticleText() {
     const container = $("#heroParticleText");
     if (!container) return;
@@ -1976,6 +1559,8 @@ void main() {
     let width = 0;
     let height = 0;
     let dpr = 1;
+    let heroVisible = true;
+    let pageVisible = !document.hidden;
 
     const pointer = { active: false, x: 0, y: 0, smoothX: 0, smoothY: 0 };
     const waves = [];
@@ -2047,7 +1632,7 @@ void main() {
     }
 
     function render(now) {
-      if (document.hidden) {
+      if (!heroVisible || !pageVisible || document.hidden) {
         animationFrame = 0;
         return;
       }
@@ -2117,7 +1702,9 @@ void main() {
     }
 
     function ensureRenderLoop() {
-      if (animationFrame === null) animationFrame = requestAnimationFrame(render);
+      if (heroVisible && pageVisible && !document.hidden && animationFrame === null) {
+        animationFrame = requestAnimationFrame(render);
+      }
     }
 
     function resolveFontSize(value, fontWeight, fontFamily) {
@@ -2293,8 +1880,25 @@ void main() {
 
     const ro = new ResizeObserver(queueSample);
     ro.observe(container);
+    // 首屏滚出视口后暂停粒子渲染，避免后台持续消耗 GPU
+    const heroIo = new IntersectionObserver((entries) => {
+      heroVisible = entries.some((en) => en.isIntersecting);
+      if (!heroVisible) {
+        if (animationFrame) cancelAnimationFrame(animationFrame);
+        animationFrame = 0;
+      } else if (animationFrame === 0) {
+        ensureRenderLoop();
+      }
+    }, { threshold: 0 });
+    heroIo.observe(container);
     document.addEventListener("visibilitychange", () => {
-      if (!document.hidden && animationFrame === 0) ensureRenderLoop();
+      pageVisible = !document.hidden;
+      if (!pageVisible) {
+        if (animationFrame) cancelAnimationFrame(animationFrame);
+        animationFrame = 0;
+      } else if (heroVisible && animationFrame === 0) {
+        ensureRenderLoop();
+      }
     });
     sampleText();
   }
@@ -2304,7 +1908,7 @@ void main() {
     initAccordionGallery();
     initParticleText();
     initLightTunnel();
-    initWarpText();
+
     initReveal();
     initParallax();
     initHeroParallax();
