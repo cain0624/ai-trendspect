@@ -6,12 +6,6 @@
 
 @font-face {
   font-family: "Sora";
-  src: url("../vendor/fonts/sora-200.ttf") format("truetype");
-  font-weight: 200;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Sora";
   src: url("../vendor/fonts/sora-300.ttf") format("truetype");
   font-weight: 300;
   font-display: swap;
@@ -32,12 +26,6 @@
   font-family: "JetBrains Mono";
   src: url("../vendor/fonts/jbm-400.ttf") format("truetype");
   font-weight: 400;
-  font-display: swap;
-}
-@font-face {
-  font-family: "JetBrains Mono";
-  src: url("../vendor/fonts/jbm-500.ttf") format("truetype");
-  font-weight: 500;
   font-display: swap;
 }
 @font-face {
@@ -945,12 +933,11 @@ main {
 
 .ag-panel__media {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 100%;
-  width: auto;
-  aspect-ratio: 16 / 9;
-  transform: translate(-50%, -50%) translateX(var(--ag-shift, 0px));
+  transform: translateX(var(--ag-shift, 0px));
   transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform, filter;
 }
@@ -1824,45 +1811,6 @@ main {
   font-size: 12px;
 }
 
-/* ============ 免责声明条 ============ */
-.disclaimer {
-  position: fixed;
-  left: 50%;
-  bottom: 14px;
-  transform: translateX(-50%);
-  z-index: 60;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  max-width: min(880px, calc(100vw - 28px));
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-  border: 1px solid color-mix(in srgb, var(--warn) 35%, transparent);
-  border-radius: var(--radius-pill);
-  padding: 9px 12px 9px 18px;
-  font-size: 13px;
-  color: var(--text-2);
-  box-shadow: var(--shadow-pop);
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.disclaimer strong {
-  color: var(--warn);
-}
-
-.disclaimer.is-hidden {
-  opacity: 0;
-  transform: translate(-50%, 20px);
-  pointer-events: none;
-}
-
-.disclaimer .icon-btn {
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
-}
-
 /* ============ 弹层 ============ */
 .modal {
   position: fixed;
@@ -2122,11 +2070,16 @@ main {
 
   .ag-panel__label {
     bottom: 0;
-    height: 36px;
+    height: 22px;
+  }
+
+  .ag-panel--active .ag-panel__overlay {
+    background:
+      linear-gradient(to top, rgba(0, 0, 0, 0.4) 0 22px, transparent 22px);
   }
 
   .ag-panel__text {
-    font-size: 12px;
+    font-size: 10px;
   }
 
   .news-card {
@@ -2226,12 +2179,6 @@ main {
     flex-wrap: wrap;
   }
 
-  .disclaimer {
-    border-radius: 12px;
-    bottom: calc(10px + env(safe-area-inset-bottom));
-    padding: 10px 12px;
-  }
-
   .graph-canvas {
     height: 420px;
   }
@@ -2262,11 +2209,20 @@ main {
   .hero-gallery {
     height: 100px;
     margin-top: 14px;
-    --ag-grow: 2;
+    --ag-grow: 2.2;
   }
 
   .ag-panel__text {
-    font-size: 11px;
+    font-size: 10px;
+  }
+
+  .ag-panel__label {
+    height: 18px;
+  }
+
+  .ag-panel--active .ag-panel__overlay {
+    background:
+      linear-gradient(to top, rgba(0, 0, 0, 0.4) 0 18px, transparent 18px);
   }
 
   .chart-body {

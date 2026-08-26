@@ -43,8 +43,15 @@
 
     function measure() {
       const rect = root.getBoundingClientRect();
-      // 媒体内容锁定 16:9 横版：宽 = 高 × 16/9
-      mediaSize = Math.max(120, rect.height * (16 / 9));
+      const cs = getComputedStyle(root);
+      const gap = parseFloat(cs.getPropertyValue("--ag-gap")) || 10;
+      const grow = parseFloat(cs.getPropertyValue("--ag-grow")) || 2.6;
+      const avail = Math.max(1, rect.width - (count - 1) * gap);
+      // 展开面板锁定 16:9：画廊高度 = 激活面板宽度 × 9/16，任何屏幕比例下展开即 16:9
+      const activeW = (avail * grow) / (count - 1 + grow);
+      const h = Math.max(56, activeW * (9 / 16));
+      root.style.height = h + "px";
+      mediaSize = Math.max(120, h * (16 / 9));
       applyLayout();
     }
 
@@ -921,17 +928,6 @@
   }
 
   /* ============ 免责声明 ============ */
-  function initDisclaimer() {
-    const bar = $("#disclaimer");
-    if (localStorage.getItem("ms-disclaimer") === "1") {
-      bar.classList.add("is-hidden");
-    }
-    $("#disclaimerClose").addEventListener("click", () => {
-      bar.classList.add("is-hidden");
-      localStorage.setItem("ms-disclaimer", "1");
-    });
-  }
-
   /* ============ 图表导出与维度切换 ============ */
   function initChartActions() {
     $$(".export-btn").forEach((btn) => {
@@ -1910,8 +1906,8 @@ void main() {
     if (!el) return;
 
     const started = performance.now();
-    const MIN_MS = 700;   // 至少展示 0.7s，避免闪一下
-    const MAX_MS = 4000;  // 兜底：最多 4s，资源再慢也不卡住页面
+    const MIN_MS = 600;   // 至少展示 0.6s，避免闪一下
+    const MAX_MS = 3000;  // 兜底：最多 3s，资源再慢也不卡住页面
     let done = false;
 
     function finish() {
@@ -1967,7 +1963,6 @@ void main() {
     initModal();
     initTools();
     initNav();
-    initDisclaimer();
     initChartActions();
     initSpecularButtons();
 

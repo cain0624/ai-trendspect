@@ -687,9 +687,23 @@
   };
   const hooks = {};
 
-  function ensure(id, graphClick) {
-    if (instances[id]) return instances[id];
-    if (!pending[id]) return null;
+  /* ECharts 懒加载：首次进入图表视口时才注入 1MB 脚本 */
+  let echartsPromise = null;
+  function loadECharts() {
+    if (window.echarts) return Promise.resolve();
+    if (echartsPromise) return echartsPromise;
+    echartsPromise = new Promise((resolve) => {
+      const s = document.createElement("script");
+      s.src = "vendor/echarts.min.js";
+      s.async = true;
+      s.onload = () => resolve();
+      s.onerror = () => resolve(); // 加载失败也不卡死，避免无限等待
+      document.head.appendChild(s);
+    });
+    return echartsPromise;
+  }
+
+  function initWith(id, graphClick) {
     const chart = init(id, pending[id]());
     if (id === "eventGraph" && chart && (graphClick || (window.CHARTS && window.CHARTS._graphClick))) {
       const cb = graphClick || window.CHARTS._graphClick;
@@ -699,10 +713,23 @@
       });
     }
     if (hooks[id]) {
-      hooks[id](chart);
+      hooks[id].forEach((cb) => cb(chart));
       delete hooks[id];
     }
     return chart;
+  }
+
+  function ensure(id, graphClick) {
+    if (instances[id]) return instances[id];
+    if (!pending[id]) return null;
+    if (!window.echarts) {
+      loadECharts().then(() => {
+        if (instances[id]) return;
+        initWith(id, graphClick);
+      });
+      return null;
+    }
+    return initWith(id, graphClick);
   }
 
   window.CHARTS = {
@@ -729,15 +756,25 @@
       return ensure(id);
     },
     _onChartReady: function (id, cb) {
-      hooks[id] = cb;
+      (hooks[id] = hooks[id] || []).push(cb);
     },
     updateFund: function (dim) {
       const chart = ensure("fundChart");
-      if (chart) chart.setOption(fundOption(dim), { notMerge: true });
+      if (chart) {
+        chart.setOption(fundOption(dim), { notMerge: true });
+        return;
+      }
+      this._onChartReady("fundChart", (c) => c.setOption(fundOption(dim), { notMerge: true }));
     },
     exportPng: function (id, filename) {
       const chart = ensure(id);
-      if (!chart) return;
+      if (chart) {
+        this._savePng(chart, filename);
+        return;
+      }
+      this._onChartReady(id, (c) => this._savePng(c, filename));
+    },
+    _savePng: function (chart, filename) {
       const url = chart.getDataURL({
         pixelRatio: 2,
         backgroundColor: cssVar("--surface")
