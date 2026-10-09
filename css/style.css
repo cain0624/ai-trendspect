@@ -767,8 +767,6 @@ main {
 }
 
 .hero__panel {
-  position: relative;
-  top: -40px;
   width: 100%;
   max-width: 880px;
   display: flex;
@@ -2423,7 +2421,7 @@ main {
 
 /* Anchor the particle headline to the hero center instead of cumulative offsets. */
 .hero__body{display:block;padding:0;overflow:hidden}
-.hero__panel{--title-height:clamp(110px,18svh,170px);position:absolute;left:50%;top:calc(50% - var(--title-height)/2);transform:translateX(-50%);width:calc(100% - var(--gutter)*2);max-width:880px}
+.hero__panel{--title-height:clamp(110px,18svh,170px);position:absolute;left:50%;top:calc(50% - var(--title-height)/2 - 40px);transform:translateX(-50%);width:calc(100% - var(--gutter)*2);max-width:880px}
 .hero__tagline{margin:0;transform:none}
 .hero__particle-title{height:var(--title-height);min-height:var(--title-height);transform:none}
 .hero__title-sub{margin-top:0;transform:none}
